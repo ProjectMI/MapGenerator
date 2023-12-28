@@ -21,6 +21,7 @@ void DungeonGenerator::generate() {
     connectRooms();
     replaceDotsWithHashes();
     generateWalls();
+    generateDoors(45);
 }
 
 void DungeonGenerator::printMap() {
@@ -28,6 +29,23 @@ void DungeonGenerator::printMap() {
         for (int j = 0; j < mapWidth; ++j) {
             int cellValue = dungeonMap[i][j];
 
+            // Определение цвета в зависимости от значения ячейки
+            std::string colorCode = "";
+            if (cellValue == 2) {
+                // Стенка (желтый)
+                colorCode = "\033[38;5;226m";
+            }
+            else if (cellValue == 1) {
+                // Тайл (зеленый)
+                colorCode = "\033[38;5;34m";
+            }
+            else if (cellValue == 3) {
+                // Дверь (красный)
+                colorCode = "\033[38;5;196m";
+            }
+
+            // Вывод символа с цветом
+            std::cout << colorCode;
             if (cellValue == 0) {
                 std::cout << ' ';  // Решетка
             }
@@ -38,14 +56,15 @@ void DungeonGenerator::printMap() {
                 std::cout << 'I';  // Стенка
             }
             else if (cellValue == 3) {
-               // std::cout << '';  // Ничего
+                std::cout << 'H';  // Дверь
             }
+            std::cout << "\033[0m ";  // Сброс цвета
 
-            std::cout << ' ';
         }
         std::cout << std::endl;
     }
 }
+
 
 
 void DungeonGenerator::replaceDotsWithHashes() {
@@ -77,7 +96,7 @@ void DungeonGenerator::generateWalls() {
                 // Проверяем все соседние клетки, включая диагонали
                 for (int dx = -1; dx <= 1; ++dx) {
                     for (int dy = -1; dy <= 1; ++dy) {
-                        // Убедитесь, что соседняя клетка находится в пределах карты
+                        // Нужно убедиться, что соседняя клетка находится в пределах карты
                         int ni = i + dx;
                         int nj = j + dy;
 
@@ -96,6 +115,55 @@ void DungeonGenerator::generateWalls() {
         }
     }
 }
+
+void DungeonGenerator::generateDoors(int doorChanceThreshold) {
+    for (int i = 1; i < mapHeight - 1; ++i) {
+        for (int j = 1; j < mapWidth - 1; ++j) {
+            if (dungeonMap[i][j] == 1) {  // Проверяем, если текущая ячейка представляет собой тайл
+                bool hasVerticalWall = (dungeonMap[i - 1][j] == 2 && dungeonMap[i + 1][j] == 2);
+                bool hasHorizontalWall = (dungeonMap[i][j - 1] == 2 && dungeonMap[i][j + 1] == 2);
+                int tileCount = 0;
+
+                // Подсчет окружающих тайлов в каждом направлении
+                int leftTileCount = 0, rightTileCount = 0, upTileCount = 0, downTileCount = 0;
+                for (int dx = -1; dx <= 1; ++dx) {
+                    for (int dy = -1; dy <= 1; ++dy) {
+                        if (dx != 0 || dy != 0) {  // Исключаем текущую ячейку
+                            if (dungeonMap[i + dx][j + dy] == 1) {
+                                tileCount++;
+                                // Подсчет тайлов в каждом направлении
+                                if (dx == -1) leftTileCount++;
+                                else if (dx == 1) rightTileCount++;
+                                if (dy == -1) upTileCount++;
+                                else if (dy == 1) downTileCount++;
+                            }
+                            else if (dungeonMap[i + dx][j + dy] == 3) {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Проверяем условия для генерации двери
+                if ((hasVerticalWall && !hasHorizontalWall && (upTileCount > 0 || downTileCount > 0)) ||
+                    (hasHorizontalWall && !hasVerticalWall && (leftTileCount > 0 || rightTileCount > 0))) {
+                    if (tileCount > 3) {
+                        int randomChance = std::rand() % 100;
+                        if (randomChance < doorChanceThreshold) {
+                            dungeonMap[i][j] = 3;  // Меняем тайл на дверь (например, 3, нужно будет подумать стоит ли менять магические числа)
+                        }
+                        
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
 
 
 void DungeonGenerator::generateRooms() {

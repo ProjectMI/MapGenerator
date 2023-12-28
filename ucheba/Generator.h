@@ -20,6 +20,7 @@ public:
     void replaceDotsWithHashes();
     void generateWalls();
     void generateRooms();
+    void generateDoors(int doorChanceThreshold);
     void fillTiles(const Room& room);
     bool isOverlap(const Room& room) const;
     void generateCorridors();
