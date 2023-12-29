@@ -4,12 +4,14 @@
 #include <ctime>
 #include <algorithm>
 #include <iostream>
+#include "mapRenderer.h"
+#include "room.h"
 
 DungeonGenerator::DungeonGenerator(int numRooms, int mapHeight, int mapWidth, int minRoomSize, int maxRoomSize,
                                    int minExits, int maxExits, int minCorridorLength, int maxCorridorLength)   :
     numRooms(numRooms), mapHeight(mapHeight), mapWidth(mapWidth), minRoomSize(minRoomSize),
     maxRoomSize(maxRoomSize), minExits(minExits), maxExits(maxExits),
-    minCorridorLength(minCorridorLength), maxCorridorLength(maxCorridorLength)
+    minCorridorLength(minCorridorLength), maxCorridorLength(maxCorridorLength), pregen(pregen)
 {
     srand(time(nullptr));
     dungeonMap.resize(mapHeight, std::vector<int>(mapWidth, 0));
@@ -29,37 +31,9 @@ void DungeonGenerator::printMap() {
         for (int j = 0; j < mapWidth; ++j) {
             int cellValue = dungeonMap[i][j];
 
-            // Определение цвета в зависимости от значения ячейки
-            std::string colorCode = "";
-            if (cellValue == 2) {
-                // Стенка (желтый)
-                colorCode = "\033[38;5;226m";
-            }
-            else if (cellValue == 1) {
-                // Тайл (зеленый)
-                colorCode = "\033[38;5;34m";
-            }
-            else if (cellValue == 3) {
-                // Дверь (красный)
-                colorCode = "\033[38;5;196m";
-            }
-
-            // Вывод символа с цветом
-            std::cout << colorCode;
-            if (cellValue == 0) {
-                std::cout << ' ';  // Решетка
-            }
-            else if (cellValue == 1) {
-                std::cout << '.';  // Тайл
-            }
-            else if (cellValue == 2) {
-                std::cout << 'I';  // Стенка
-            }
-            else if (cellValue == 3) {
-                std::cout << 'H';  // Дверь
-            }
-            std::cout << "\033[0m ";  // Сброс цвета
-
+            renderer->setConsoleColor(cellValue);
+            renderer->renderCell(cellValue);
+            renderer->resetConsoleColor();
         }
         std::cout << std::endl;
     }
@@ -148,7 +122,7 @@ void DungeonGenerator::generateDoors(int doorChanceThreshold) {
                 if ((hasVerticalWall && !hasHorizontalWall && (upTileCount > 0 || downTileCount > 0)) ||
                     (hasHorizontalWall && !hasVerticalWall && (leftTileCount > 0 || rightTileCount > 0))) {
                     if (tileCount > 3) {
-                        int randomChance = std::rand() % 100;
+                        int randomChance = std::rand() % 100; // бросаем кубики на создание двери
                         if (randomChance < doorChanceThreshold) {
                             dungeonMap[i][j] = 3;  // Меняем тайл на дверь (например, 3, нужно будет подумать стоит ли менять магические числа)
                         }
@@ -159,12 +133,6 @@ void DungeonGenerator::generateDoors(int doorChanceThreshold) {
         }
     }
 }
-
-
-
-
-
-
 
 void DungeonGenerator::generateRooms() {
     for (int i = 0; i < numRooms; ++i) {
@@ -291,4 +259,12 @@ void DungeonGenerator::generatePath(int startX, int startY, int endX, int endY) 
             dungeonMap[currentY][currentX] = 1;
         }
     }
+}
+
+void DungeonGenerator::setPregenRoom() {
+    int x = rand() % (mapWidth);
+    int y = rand() % (mapHeight);
+    pregenRoom layout = pregen.getLayout();
+
+
 }

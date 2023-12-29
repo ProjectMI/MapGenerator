@@ -2,6 +2,8 @@
 #define GENERATOR_H
 
 #include <vector>
+#include "mapRenderer.h"
+#include "room.h"
 
 struct Room {
     int x, y, width, height;
@@ -28,6 +30,7 @@ public:
     void generateCorridor(const Corridor& corridor);
     void connectRooms();
     void generatePath(int startX, int startY, int endX, int endY);
+    void setPregenRoom();
 
 private:
     int numRooms;
@@ -38,6 +41,8 @@ private:
     std::vector<std::vector<int>> dungeonMap;
     std::vector<Room> rooms;
     std::vector<Corridor> corridors;
+    MapRenderer *renderer = new MapRenderer;
+    pregenRoom pregen;
 };
 
 
