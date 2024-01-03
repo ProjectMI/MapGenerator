@@ -1,5 +1,5 @@
-#ifndef ROOM_H
-#define ROOM_H
+#ifndef PREGENROOM_H
+#define PREGENROOM_H
 
 #include <vector>
 

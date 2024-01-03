@@ -4,15 +4,15 @@
     char MapRenderer::getSymbolForCellValue(int cellValue) {
         switch (cellValue) {
         case 0:
-            return ' ';  // Решетка
+            return ' ';  // Р РµС€РµС‚РєР°
         case 1:
-            return '.';  // Тайл
+            return '.';  // РўР°Р№Р»
         case 2:
-            return 'I';  // Стенка
+            return 'I';  // РЎС‚РµРЅРєР°
         case 3:
-            return 'H';  // Дверь
+            return 'H';  // Р”РІРµСЂСЊ
         default:
-            return ' ';  // По умолчанию, например, для неизвестных значений
+            return ' ';  // РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ, РЅР°РїСЂРёРјРµСЂ, РґР»СЏ РЅРµРёР·РІРµСЃС‚РЅС‹С… Р·РЅР°С‡РµРЅРёР№
         }
     }
 
@@ -24,19 +24,19 @@
         std::string colorCode = "";
         switch (cellValue) {
         case 2:
-            // Стенка (желтый)
+            // РЎС‚РµРЅРєР° (Р¶РµР»С‚С‹Р№)
             colorCode = "\033[38;5;226m";
             break;
         case 1:
-            // Тайл (зеленый)
+            // РўР°Р№Р» (Р·РµР»РµРЅС‹Р№)
             colorCode = "\033[38;5;34m";
             break;
         case 3:
-            // Дверь (красный)
+            // Р”РІРµСЂСЊ (РєСЂР°СЃРЅС‹Р№)
             colorCode = "\033[38;5;196m";
             break;
         default:
-            // Стандартный цвет
+            // РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ С†РІРµС‚
             colorCode = "\033[0m";
             break;
         }
@@ -45,5 +45,5 @@
     }
 
     void MapRenderer::resetConsoleColor() {
-        std::cout << "\033[0m ";  // Сброс цвета
+        std::cout << "\033[0m ";  // РЎР±СЂРѕСЃ С†РІРµС‚Р°
     }

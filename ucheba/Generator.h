@@ -3,14 +3,14 @@
 
 #include <vector>
 #include "mapRenderer.h"
-#include "room.h"
+#include "pregenRoom.h"
 
 struct Room {
     int x, y, width, height;
 };
 
 struct Corridor {
-    int startX, startY, length, direction; // Direction: 0 - вверх, 1 - вправо, 2 - вниз, 3 - влево
+    int startX, startY, length, direction; // Direction: 0 - РІРІРµСЂС…, 1 - РІРїСЂР°РІРѕ, 2 - РІРЅРёР·, 3 - РІР»РµРІРѕ
 };
 
 class DungeonGenerator {
@@ -30,7 +30,7 @@ public:
     void generateCorridor(const Corridor& corridor);
     void connectRooms();
     void generatePath(int startX, int startY, int endX, int endY);
-    void setPregenRoom();
+    void setPregenRoom(const pregenRoom& pregen, int roomCount);
 
 private:
     int numRooms;

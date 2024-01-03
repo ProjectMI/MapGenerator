@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <iostream>
 #include "mapRenderer.h"
-#include "room.h"
+#include "pregenRoom.h"
 
 DungeonGenerator::DungeonGenerator(int numRooms, int mapHeight, int mapWidth, int minRoomSize, int maxRoomSize,
                                    int minExits, int maxExits, int minCorridorLength, int maxCorridorLength)   :
@@ -21,9 +21,11 @@ void DungeonGenerator::generate() {
     generateRooms();
     generateCorridors();
     connectRooms();
+    setPregenRoom(pregen.room1(), 1);
     replaceDotsWithHashes();
     generateWalls();
     generateDoors(45);
+    
 }
 
 void DungeonGenerator::printMap() {
@@ -42,23 +44,23 @@ void DungeonGenerator::printMap() {
 
 
 void DungeonGenerator::replaceDotsWithHashes() {
-    // Перебираем верхнюю и нижнюю границы карты
+    // РџРµСЂРµР±РёСЂР°РµРј РІРµСЂС…РЅСЋСЋ Рё РЅРёР¶РЅСЋСЋ РіСЂР°РЅРёС†С‹ РєР°СЂС‚С‹
     for (int i = 0; i < mapWidth; ++i) {
         if (dungeonMap[0][i] == 1) {
-            dungeonMap[0][i] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+            dungeonMap[0][i] = 2;  // Р—Р°РјРµРЅСЏРµРј С‚РѕС‡РєСѓ РЅР° РґСЂСѓРіРѕРµ Р·РЅР°С‡РµРЅРёРµ (РЅР°РїСЂРёРјРµСЂ, 0), РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰РµРµ СЃС‚РµРЅРєСѓ
         }
         if (dungeonMap[mapHeight - 1][i] == 1) {
-            dungeonMap[mapHeight - 1][i] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+            dungeonMap[mapHeight - 1][i] = 2;  // Р—Р°РјРµРЅСЏРµРј С‚РѕС‡РєСѓ РЅР° РґСЂСѓРіРѕРµ Р·РЅР°С‡РµРЅРёРµ (РЅР°РїСЂРёРјРµСЂ, 0), РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰РµРµ СЃС‚РµРЅРєСѓ
         }
     }
 
-    // Перебираем левую и правую границы карты
+    // РџРµСЂРµР±РёСЂР°РµРј Р»РµРІСѓСЋ Рё РїСЂР°РІСѓСЋ РіСЂР°РЅРёС†С‹ РєР°СЂС‚С‹
     for (int i = 0; i < mapHeight; ++i) {
         if (dungeonMap[i][0] == 1) {
-            dungeonMap[i][0] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+            dungeonMap[i][0] = 2;  // Р—Р°РјРµРЅСЏРµРј С‚РѕС‡РєСѓ РЅР° РґСЂСѓРіРѕРµ Р·РЅР°С‡РµРЅРёРµ (РЅР°РїСЂРёРјРµСЂ, 0), РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰РµРµ СЃС‚РµРЅРєСѓ
         }
         if (dungeonMap[i][mapWidth - 1] == 1) {
-            dungeonMap[i][mapWidth - 1] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+            dungeonMap[i][mapWidth - 1] = 2;  // Р—Р°РјРµРЅСЏРµРј С‚РѕС‡РєСѓ РЅР° РґСЂСѓРіРѕРµ Р·РЅР°С‡РµРЅРёРµ (РЅР°РїСЂРёРјРµСЂ, 0), РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰РµРµ СЃС‚РµРЅРєСѓ
         }
     }
 }
@@ -66,23 +68,23 @@ void DungeonGenerator::replaceDotsWithHashes() {
 void DungeonGenerator::generateWalls() {
     for (int i = 0; i < mapHeight; ++i) {
         for (int j = 0; j < mapWidth; ++j) {
-            if (dungeonMap[i][j] == 0) {  // Проверяем, если текущая ячейка представляет собой решетку
-                // Проверяем все соседние клетки, включая диагонали
+            if (dungeonMap[i][j] == 0) {  // РџСЂРѕРІРµСЂСЏРµРј, РµСЃР»Рё С‚РµРєСѓС‰Р°СЏ СЏС‡РµР№РєР° РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚ СЃРѕР±РѕР№ СЂРµС€РµС‚РєСѓ
+                // РџСЂРѕРІРµСЂСЏРµРј РІСЃРµ СЃРѕСЃРµРґРЅРёРµ РєР»РµС‚РєРё, РІРєР»СЋС‡Р°СЏ РґРёР°РіРѕРЅР°Р»Рё
                 for (int dx = -1; dx <= 1; ++dx) {
                     for (int dy = -1; dy <= 1; ++dy) {
-                        // Нужно убедиться, что соседняя клетка находится в пределах карты
+                        // РќСѓР¶РЅРѕ СѓР±РµРґРёС‚СЊСЃСЏ, С‡С‚Рѕ СЃРѕСЃРµРґРЅСЏСЏ РєР»РµС‚РєР° РЅР°С…РѕРґРёС‚СЃСЏ РІ РїСЂРµРґРµР»Р°С… РєР°СЂС‚С‹
                         int ni = i + dx;
                         int nj = j + dy;
 
                         if (ni >= 0 && ni < mapHeight && nj >= 0 && nj < mapWidth) {
                             if (dungeonMap[ni][nj] == 1) {
-                                dungeonMap[i][j] = 2;  // Меняем решетку на стенку (например 2, нужно будет подумать стоит ли менять магические числа)
-                                break;  // Прекращаем проверку при первом обнаружении соседней тайловой клетки
+                                dungeonMap[i][j] = 2;  // РњРµРЅСЏРµРј СЂРµС€РµС‚РєСѓ РЅР° СЃС‚РµРЅРєСѓ (РЅР°РїСЂРёРјРµСЂ 2, РЅСѓР¶РЅРѕ Р±СѓРґРµС‚ РїРѕРґСѓРјР°С‚СЊ СЃС‚РѕРёС‚ Р»Рё РјРµРЅСЏС‚СЊ РјР°РіРёС‡РµСЃРєРёРµ С‡РёСЃР»Р°)
+                                break;  // РџСЂРµРєСЂР°С‰Р°РµРј РїСЂРѕРІРµСЂРєСѓ РїСЂРё РїРµСЂРІРѕРј РѕР±РЅР°СЂСѓР¶РµРЅРёРё СЃРѕСЃРµРґРЅРµР№ С‚Р°Р№Р»РѕРІРѕР№ РєР»РµС‚РєРё
                             }
                         }
                     }
                     if (dungeonMap[i][j] == 2) {
-                        break;  // Прекращаем проверку, если уже заменили решетку на стенку
+                        break;  // РџСЂРµРєСЂР°С‰Р°РµРј РїСЂРѕРІРµСЂРєСѓ, РµСЃР»Рё СѓР¶Рµ Р·Р°РјРµРЅРёР»Рё СЂРµС€РµС‚РєСѓ РЅР° СЃС‚РµРЅРєСѓ
                     }
                 }
             }
@@ -93,19 +95,19 @@ void DungeonGenerator::generateWalls() {
 void DungeonGenerator::generateDoors(int doorChanceThreshold) {
     for (int i = 1; i < mapHeight - 1; ++i) {
         for (int j = 1; j < mapWidth - 1; ++j) {
-            if (dungeonMap[i][j] == 1) {  // Проверяем, если текущая ячейка представляет собой тайл
+            if (dungeonMap[i][j] == 1) {  // РџСЂРѕРІРµСЂСЏРµРј, РµСЃР»Рё С‚РµРєСѓС‰Р°СЏ СЏС‡РµР№РєР° РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚ СЃРѕР±РѕР№ С‚Р°Р№Р»
                 bool hasVerticalWall = (dungeonMap[i - 1][j] == 2 && dungeonMap[i + 1][j] == 2);
                 bool hasHorizontalWall = (dungeonMap[i][j - 1] == 2 && dungeonMap[i][j + 1] == 2);
                 int tileCount = 0;
 
-                // Подсчет окружающих тайлов в каждом направлении
+                // РџРѕРґСЃС‡РµС‚ РѕРєСЂСѓР¶Р°СЋС‰РёС… С‚Р°Р№Р»РѕРІ РІ РєР°Р¶РґРѕРј РЅР°РїСЂР°РІР»РµРЅРёРё
                 int leftTileCount = 0, rightTileCount = 0, upTileCount = 0, downTileCount = 0;
                 for (int dx = -1; dx <= 1; ++dx) {
                     for (int dy = -1; dy <= 1; ++dy) {
-                        if (dx != 0 || dy != 0) {  // Исключаем текущую ячейку
+                        if (dx != 0 || dy != 0) {  // РСЃРєР»СЋС‡Р°РµРј С‚РµРєСѓС‰СѓСЋ СЏС‡РµР№РєСѓ
                             if (dungeonMap[i + dx][j + dy] == 1) {
                                 tileCount++;
-                                // Подсчет тайлов в каждом направлении
+                                // РџРѕРґСЃС‡РµС‚ С‚Р°Р№Р»РѕРІ РІ РєР°Р¶РґРѕРј РЅР°РїСЂР°РІР»РµРЅРёРё
                                 if (dx == -1) leftTileCount++;
                                 else if (dx == 1) rightTileCount++;
                                 if (dy == -1) upTileCount++;
@@ -118,13 +120,13 @@ void DungeonGenerator::generateDoors(int doorChanceThreshold) {
                     }
                 }
 
-                // Проверяем условия для генерации двери
+                // РџСЂРѕРІРµСЂСЏРµРј СѓСЃР»РѕРІРёСЏ РґР»СЏ РіРµРЅРµСЂР°С†РёРё РґРІРµСЂРё
                 if ((hasVerticalWall && !hasHorizontalWall && (upTileCount > 0 || downTileCount > 0)) ||
                     (hasHorizontalWall && !hasVerticalWall && (leftTileCount > 0 || rightTileCount > 0))) {
                     if (tileCount > 3) {
-                        int randomChance = std::rand() % 100; // бросаем кубики на создание двери
+                        int randomChance = std::rand() % 100; // Р±СЂРѕСЃР°РµРј РєСѓР±РёРєРё РЅР° СЃРѕР·РґР°РЅРёРµ РґРІРµСЂРё
                         if (randomChance < doorChanceThreshold) {
-                            dungeonMap[i][j] = 3;  // Меняем тайл на дверь (например, 3, нужно будет подумать стоит ли менять магические числа)
+                            dungeonMap[i][j] = 3;  // РњРµРЅСЏРµРј С‚Р°Р№Р» РЅР° РґРІРµСЂСЊ (РЅР°РїСЂРёРјРµСЂ, 3, РЅСѓР¶РЅРѕ Р±СѓРґРµС‚ РїРѕРґСѓРјР°С‚СЊ СЃС‚РѕРёС‚ Р»Рё РјРµРЅСЏС‚СЊ РјР°РіРёС‡РµСЃРєРёРµ С‡РёСЃР»Р°)
                         }
                         
                     }
@@ -155,7 +157,7 @@ void DungeonGenerator::generateRooms() {
 void DungeonGenerator::fillTiles(const Room& room) {
     for (int i = room.y; i < room.y + room.height; ++i) {
         for (int j = room.x; j < room.x + room.width; ++j) {
-            dungeonMap[i][j] = 1;
+            dungeonMap[i][j] = 1; // Р·Р°Р»РёРІР°РµРј РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ С‚Р°Р№Р»Р°РјРё
         }
     }
 }
@@ -201,16 +203,16 @@ void DungeonGenerator::generateCorridor(const Corridor& corridor) {
         }
 
         switch (corridor.direction) {
-        case 0: // Вверх
+        case 0: // Р’РІРµСЂС…
             --y;
             break;
-        case 1: // Вправо
+        case 1: // Р’РїСЂР°РІРѕ
             ++x;
             break;
-        case 2: // Вниз
+        case 2: // Р’РЅРёР·
             ++y;
             break;
-        case 3: // Влево
+        case 3: // Р’Р»РµРІРѕ
             --x;
             break;
         }
@@ -261,10 +263,48 @@ void DungeonGenerator::generatePath(int startX, int startY, int endX, int endY) 
     }
 }
 
-void DungeonGenerator::setPregenRoom() {
-    int x = rand() % (mapWidth);
-    int y = rand() % (mapHeight);
-    pregenRoom layout = pregen.getLayout();
+void DungeonGenerator::setPregenRoom(const pregenRoom& pregen, int roomCount) {
+    for (int i = 0; i < roomCount; ++i) {
+        const std::vector<std::vector<int>>& roomLayout = pregen.getLayout();
 
+        // РџРѕР»СѓС‡Р°РµРј СЂР°Р·РјРµСЂС‹ РєРѕРјРЅР°С‚С‹ Рё РєР°СЂС‚С‹
+        int roomHeight = roomLayout.size();
+        int roomWidth = roomLayout[0].size();
 
+        // РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РєРѕРѕСЂРґРёРЅР°С‚ РІСЃС‚Р°РІРєРё РєРѕРјРЅР°С‚С‹
+        int startX, startY;
+
+        // Р¤Р»Р°Рі РґР»СЏ РѕР±РѕР·РЅР°С‡РµРЅРёСЏ СѓСЃРїРµС€РЅРѕСЃС‚Рё РІСЃС‚Р°РІРєРё РєРѕРјРЅР°С‚С‹
+        bool roomInserted = false;
+
+        // РџРµСЂРµР±РёСЂР°РµРј СЃР»СѓС‡Р°Р№РЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹, РїРѕРєР° РЅРµ РЅР°Р№РґРµРј РїРѕРґС…РѕРґСЏС‰РµРµ РјРµСЃС‚Рѕ
+        while (!roomInserted) {
+            startX = rand() % (mapWidth - roomWidth + 1);
+            startY = rand() % (mapHeight - roomHeight + 1);
+
+            // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ СЃРІРѕР±РѕРґРЅРѕРіРѕ РјРµСЃС‚Р° РґР»СЏ РІСЃС‚Р°РІРєРё РєРѕРјРЅР°С‚С‹
+            bool canPlaceRoom = true;
+            for (int x = startX; x < startX + roomWidth; ++x) {
+                for (int y = startY; y < startY + roomHeight; ++y) {
+                    if (dungeonMap[y][x] = 1) { // Р’С‹Р±РёСЂР°РµРј С‚РёРї РїРѕРІРµСЂС…РЅРѕСЃС‚Рё, РЅР° РєРѕС‚РѕСЂС‹Р№ Р±СѓРґРµС‚ РґРµР»Р°С‚СЊ РїСЂРѕРІРµСЂРєСѓ, РІ РЅР°С€РµРј СЃР»СѓС‡Р°Рµ СЌС‚Рѕ С‚Р°Р№Р»
+                        canPlaceRoom = true;
+                        break;
+                    }
+                }
+                if (!canPlaceRoom) {
+                    break;
+                }
+            }
+
+            // Р•СЃР»Рё РµСЃС‚СЊ СЃРІРѕР±РѕРґРЅРѕРµ РјРµСЃС‚Рѕ, РІСЃС‚Р°РІР»СЏРµРј РєРѕРјРЅР°С‚Сѓ РІ РєР°СЂС‚Сѓ
+            if (canPlaceRoom) {
+                for (int x = 0; x < roomWidth; ++x) {
+                    for (int y = 0; y < roomHeight; ++y) {
+                        dungeonMap[startY + y][startX + x] = roomLayout[y][x];
+                    }
+                }
+                roomInserted = true;
+            }
+        }
+    }
 }
