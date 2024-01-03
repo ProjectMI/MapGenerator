@@ -3,6 +3,8 @@
 
     char MapRenderer::getSymbolForCellValue(int cellValue) {
         switch (cellValue) {
+        default:
+            return ' ';  // По умолчанию, например, для неизвестных значений
         case 0:
             return ' ';  // Решетка
         case 1:
@@ -11,8 +13,16 @@
             return 'I';  // Стенка
         case 3:
             return 'H';  // Дверь
-        default:
-            return ' ';  // По умолчанию, например, для неизвестных значений
+        case 4:
+            return '#'; // Лава
+        case 5:
+            return 'V'; // Облако дыма
+        case 6:
+            return 'M'; // Магмовый камень
+        case 7:
+            return 'A'; // Пепел и каменные осколки
+        case 8:
+            return 'F'; // Огонь 
         }
     }
 
