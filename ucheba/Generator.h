@@ -4,19 +4,13 @@
 #include <vector>
 #include "mapRenderer.h"
 #include "pregenRoom.h"
+#include "structs.h"
+#include "dungeonConfig.h"
 
-struct Room {
-    int x, y, width, height;
-};
-
-struct Corridor {
-    int startX, startY, length, direction; // Direction: 0 - вверх, 1 - вправо, 2 - вниз, 3 - влево
-};
 
 class DungeonGenerator {
 public:
-    DungeonGenerator(int numRooms, int mapHeight, int mapWidth, int minRoomSize, int maxRoomSize,
-                     int minExits, int maxExits, int minCorridorLength, int maxCorridorLength);
+    DungeonGenerator(DungeonConfig* config);
     void generate();
     void printMap();
     void replaceDotsWithHashes();
@@ -31,18 +25,17 @@ public:
     void connectRooms();
     void generatePath(int startX, int startY, int endX, int endY);
     void setPregenRoom(const pregenRoom& pregen, int roomCount);
+    void pregenRooms();
+    const std::vector<std::vector<int>>& getDungeonMap() const;
 
 private:
-    int numRooms;
-    int mapHeight, mapWidth;
-    int minRoomSize, maxRoomSize;
-    int minExits, maxExits;
-    int minCorridorLength, maxCorridorLength;
+    DungeonConfig* config;
+    MapRenderer* renderer = new MapRenderer;
+    pregenRoom pregen;
     std::vector<std::vector<int>> dungeonMap;
     std::vector<Room> rooms;
     std::vector<Corridor> corridors;
-    MapRenderer *renderer = new MapRenderer;
-    pregenRoom pregen;
+
 };
 
 

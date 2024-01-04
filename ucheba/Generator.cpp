@@ -6,32 +6,36 @@
 #include <iostream>
 #include "mapRenderer.h"
 #include "pregenRoom.h"
+#include "dungeonConfig.h"
 
-DungeonGenerator::DungeonGenerator(int numRooms, int mapHeight, int mapWidth, int minRoomSize, int maxRoomSize,
-                                   int minExits, int maxExits, int minCorridorLength, int maxCorridorLength)   :
-    numRooms(numRooms), mapHeight(mapHeight), mapWidth(mapWidth), minRoomSize(minRoomSize),
-    maxRoomSize(maxRoomSize), minExits(minExits), maxExits(maxExits),
-    minCorridorLength(minCorridorLength), maxCorridorLength(maxCorridorLength), pregen(pregen)
+DungeonGenerator::DungeonGenerator(DungeonConfig* config)   :
+    config(config), pregen(pregen)
 {
     srand(time(nullptr));
-    dungeonMap.resize(mapHeight, std::vector<int>(mapWidth, 0));
+    dungeonMap.resize(config->mapHeight, std::vector<int>(config->mapWidth, 0));
+    
 }
 
 void DungeonGenerator::generate() {
     generateRooms();
     generateCorridors();
     connectRooms();
-    setPregenRoom(pregen.room1(), 3);
-    setPregenRoom(pregen.room2(), 3);
+    pregenRooms();
     replaceDotsWithHashes();
     generateWalls();
     generateDoors(45);
     
 }
 
+//Сюда спихиваем все комнаты которые хотим загенерить
+void DungeonGenerator::pregenRooms() {
+    setPregenRoom(pregen.room1(), 3);
+    setPregenRoom(pregen.room2(), 3);
+}
+
 void DungeonGenerator::printMap() {
-    for (int i = 0; i < mapHeight; ++i) {
-        for (int j = 0; j < mapWidth; ++j) {
+    for (int i = 0; i < config->mapHeight; ++i) {
+        for (int j = 0; j < config->mapWidth; ++j) {
             int cellValue = dungeonMap[i][j];
 
             renderer->setConsoleColor(cellValue);
@@ -46,29 +50,29 @@ void DungeonGenerator::printMap() {
 
 void DungeonGenerator::replaceDotsWithHashes() {
     // Перебираем верхнюю и нижнюю границы карты
-    for (int i = 0; i < mapWidth; ++i) {
+    for (int i = 0; i < config->mapWidth; ++i) {
         if (dungeonMap[0][i] == 1) {
             dungeonMap[0][i] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
         }
-        if (dungeonMap[mapHeight - 1][i] == 1) {
-            dungeonMap[mapHeight - 1][i] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+        if (dungeonMap[config->mapHeight - 1][i] == 1) {
+            dungeonMap[config->mapHeight - 1][i] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
         }
     }
 
     // Перебираем левую и правую границы карты
-    for (int i = 0; i < mapHeight; ++i) {
+    for (int i = 0; i < config->mapHeight; ++i) {
         if (dungeonMap[i][0] == 1) {
             dungeonMap[i][0] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
         }
-        if (dungeonMap[i][mapWidth - 1] == 1) {
-            dungeonMap[i][mapWidth - 1] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+        if (dungeonMap[i][config->mapWidth - 1] == 1) {
+            dungeonMap[i][config->mapWidth - 1] = 2;  // Заменяем точку на другое значение (например, 0), представляющее стенку
         }
     }
 }
 
 void DungeonGenerator::generateWalls() {
-    for (int i = 0; i < mapHeight; ++i) {
-        for (int j = 0; j < mapWidth; ++j) {
+    for (int i = 0; i < config->mapHeight; ++i) {
+        for (int j = 0; j < config->mapWidth; ++j) {
             if (dungeonMap[i][j] == 0) {  // Проверяем, если текущая ячейка представляет собой решетку
                 // Проверяем все соседние клетки, включая диагонали
                 for (int dx = -1; dx <= 1; ++dx) {
@@ -77,7 +81,7 @@ void DungeonGenerator::generateWalls() {
                         int ni = i + dx;
                         int nj = j + dy;
 
-                        if (ni >= 0 && ni < mapHeight && nj >= 0 && nj < mapWidth) {
+                        if (ni >= 0 && ni < config->mapHeight && nj >= 0 && nj < config->mapWidth) {
                             if (dungeonMap[ni][nj] == 1) {
                                 dungeonMap[i][j] = 2;  // Меняем решетку на стенку (например 2, нужно будет подумать стоит ли менять магические числа)
                                 break;  // Прекращаем проверку при первом обнаружении соседней тайловой клетки
@@ -94,8 +98,8 @@ void DungeonGenerator::generateWalls() {
 }
 
 void DungeonGenerator::generateDoors(int doorChanceThreshold) {
-    for (int i = 1; i < mapHeight - 1; ++i) {
-        for (int j = 1; j < mapWidth - 1; ++j) {
+    for (int i = 1; i < config->mapHeight - 1; ++i) {
+        for (int j = 1; j < config->mapWidth - 1; ++j) {
             if (dungeonMap[i][j] == 1) {  // Проверяем, если текущая ячейка представляет собой тайл
                 bool hasVerticalWall = (dungeonMap[i - 1][j] == 2 && dungeonMap[i + 1][j] == 2);
                 bool hasHorizontalWall = (dungeonMap[i][j - 1] == 2 && dungeonMap[i][j + 1] == 2);
@@ -138,11 +142,11 @@ void DungeonGenerator::generateDoors(int doorChanceThreshold) {
 }
 
 void DungeonGenerator::generateRooms() {
-    for (int i = 0; i < numRooms; ++i) {
-        int roomWidth = rand() % (maxRoomSize - minRoomSize + 1) + minRoomSize;
-        int roomHeight = rand() % (maxRoomSize - minRoomSize + 1) + minRoomSize;
-        int x = rand() % (mapWidth - roomWidth);
-        int y = rand() % (mapHeight - roomHeight);
+    for (int i = 0; i < config->numRooms; ++i) {
+        int roomWidth = rand() % (config->maxRoomSize - config->minRoomSize + 1) + config->minRoomSize;
+        int roomHeight = rand() % (config->maxRoomSize - config->minRoomSize + 1) + config->minRoomSize;
+        int x = rand() % (config->mapWidth - roomWidth);
+        int y = rand() % (config->mapHeight - roomHeight);
 
         Room room = { x, y, roomWidth, roomHeight };
         if (isOverlap(room)) {
@@ -177,7 +181,7 @@ bool DungeonGenerator::isOverlap(const Room& room) const {
 
 void DungeonGenerator::generateCorridors() {
     for (const auto& room : rooms) {
-        int numExits = rand() % (maxExits - minExits + 1) + minExits;
+        int numExits = rand() % (config->maxExits - config->minExits + 1) + config->minExits;
         for (int i = 0; i < numExits; ++i) {
             generateCorridorFromRoom(room);
         }
@@ -187,7 +191,7 @@ void DungeonGenerator::generateCorridors() {
 void DungeonGenerator::generateCorridorFromRoom(const Room& room) {
     int startX = room.x + rand() % room.width;
     int startY = room.y + rand() % room.height;
-    int length = rand() % (maxCorridorLength - minCorridorLength + 1) + minCorridorLength;
+    int length = rand() % (config->maxCorridorLength - config->minCorridorLength + 1) + config->minCorridorLength;
     int direction = rand() % 4;
 
     Corridor corridor = { startX, startY, length, direction };
@@ -199,7 +203,7 @@ void DungeonGenerator::generateCorridor(const Corridor& corridor) {
     int y = corridor.startY;
 
     for (int i = 0; i < corridor.length; ++i) {
-        if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
+        if (x >= 0 && x < config->mapWidth && y >= 0 && y < config->mapHeight) {
             dungeonMap[y][x] = 1;
         }
 
@@ -245,7 +249,7 @@ void DungeonGenerator::generatePath(int startX, int startY, int endX, int endY) 
             --currentX;
         }
 
-        if (currentX >= 0 && currentX < mapWidth && currentY >= 0 && currentY < mapHeight) {
+        if (currentX >= 0 && currentX < config->mapWidth && currentY >= 0 && currentY < config->mapHeight) {
             dungeonMap[currentY][currentX] = 1;
         }
     }
@@ -258,7 +262,7 @@ void DungeonGenerator::generatePath(int startX, int startY, int endX, int endY) 
             --currentY;
         }
 
-        if (currentX >= 0 && currentX < mapWidth && currentY >= 0 && currentY < mapHeight) {
+        if (currentX >= 0 && currentX < config->mapWidth && currentY >= 0 && currentY < config->mapHeight) {
             dungeonMap[currentY][currentX] = 1;
         }
     }
@@ -283,8 +287,8 @@ void DungeonGenerator::setPregenRoom(const pregenRoom& pregen, int roomCount) {
 
         // Перебираем случайные координаты, пока не найдем подходящее место
         while (!roomInserted && attempts < maxAttempts) {
-            startX = rand() % (mapWidth - roomWidth + 1);
-            startY = rand() % (mapHeight - roomHeight + 1);
+            startX = rand() % (config->mapWidth - roomWidth + 1);
+            startY = rand() % (config->mapHeight - roomHeight + 1);
 
             // Проверяем, есть ли достаточно свободного места для вставки комнаты
             bool canPlaceRoom = true;
@@ -328,4 +332,8 @@ void DungeonGenerator::setPregenRoom(const pregenRoom& pregen, int roomCount) {
             attempts++;
         }
     }
+}
+
+const std::vector<std::vector<int>>& DungeonGenerator::getDungeonMap() const {
+    return dungeonMap;
 }
