@@ -21,7 +21,8 @@ void DungeonGenerator::generate() {
     generateRooms();
     generateCorridors();
     connectRooms();
-    setPregenRoom(pregen.room1(), 1);
+    setPregenRoom(pregen.room1(), 3);
+    setPregenRoom(pregen.room2(), 3);
     replaceDotsWithHashes();
     generateWalls();
     generateDoors(45);
@@ -277,8 +278,11 @@ void DungeonGenerator::setPregenRoom(const pregenRoom& pregen, int roomCount) {
         // Флаг для обозначения успешности вставки комнаты
         bool roomInserted = false;
 
+        int attempts = 0; // Счетчик попыток вставки комнаты
+        int maxAttempts = 1500; // Максимальное количество циклов для одной вставки
+
         // Перебираем случайные координаты, пока не найдем подходящее место
-        while (!roomInserted) {
+        while (!roomInserted && attempts < maxAttempts) {
             startX = rand() % (mapWidth - roomWidth + 1);
             startY = rand() % (mapHeight - roomHeight + 1);
 
@@ -286,8 +290,8 @@ void DungeonGenerator::setPregenRoom(const pregenRoom& pregen, int roomCount) {
             bool canPlaceRoom = true;
             for (int x = startX; x < startX + roomWidth; ++x) {
                 for (int y = startY; y < startY + roomHeight; ++y) {
-                    if (dungeonMap[y][x] = 1) { // Выбираем тип поверхности, на который будет делать проверку, в нашем случае это тайл
-                        canPlaceRoom = true;
+                    if (dungeonMap[y][x] != 1) { // Выбираем тип поверхности, на который будет делать проверку, в нашем случае это тайл
+                        canPlaceRoom = false; // Если хоть один тайл уже занят, то помечаем, что не можем разместить комнату
                         break;
                     }
                 }
@@ -296,15 +300,32 @@ void DungeonGenerator::setPregenRoom(const pregenRoom& pregen, int roomCount) {
                 }
             }
 
-            // Если есть свободное место, вставляем комнату в карту
+            // Если есть достаточно свободного места, вставляем комнату в карту
             if (canPlaceRoom) {
-                for (int x = 0; x < roomWidth; ++x) {
-                    for (int y = 0; y < roomHeight; ++y) {
-                        dungeonMap[startY + y][startX + x] = roomLayout[y][x];
+                // Дополнительная проверка на свободное место, учитывая площадь всей комнаты
+                int requiredFreeSpace = roomWidth * roomHeight;
+                for (int x = startX; x < startX + roomWidth; ++x) {
+                    for (int y = startY; y < startY + roomHeight; ++y) {
+                        if (dungeonMap[y][x] != 1) { // Если тайл уже занят, уменьшаем необходимую свободную площадь
+                            requiredFreeSpace--;
+                        }
                     }
                 }
-                roomInserted = true;
+                if (requiredFreeSpace <= 0) { // Если свободной площади не хватает, не вставляем комнату
+                    canPlaceRoom = false;
+                }
+
+                if (canPlaceRoom) {
+                    // Вставляем комнату в карту
+                    for (int x = 0; x < roomWidth; ++x) {
+                        for (int y = 0; y < roomHeight; ++y) {
+                            dungeonMap[startY + y][startX + x] = roomLayout[y][x];
+                        }
+                    }
+                    roomInserted = true;
+                }
             }
+            attempts++;
         }
     }
 }
