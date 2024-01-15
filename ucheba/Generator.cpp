@@ -11,7 +11,7 @@
 DungeonGenerator::DungeonGenerator(DungeonConfig* config)   :
     config(config), pregen(pregen)
 {
-    srand(time(nullptr));
+    srand(1);
     dungeonMap.resize(config->mapHeight, std::vector<int>(config->mapWidth, 0));
     
 }
@@ -20,7 +20,7 @@ void DungeonGenerator::generate() {
     generateRooms();
     generateCorridors();
     connectRooms();
-    pregenRooms();
+    //pregenRooms();
     replaceDotsWithHashes();
     generateWalls();
     generateDoors(45);
@@ -74,6 +74,10 @@ void DungeonGenerator::generateWalls() {
     for (int i = 0; i < config->mapHeight; ++i) {
         for (int j = 0; j < config->mapWidth; ++j) {
             if (dungeonMap[i][j] == 0) {  // Проверяем, если текущая ячейка представляет собой решетку
+                bool hasHorizontalNeighbor = false;
+                bool hasVerticalNeighbor = false;
+                bool hasDiagonalNeighbor = false;  // Добавляем проверку на диагонального соседа
+
                 // Проверяем все соседние клетки, включая диагонали
                 for (int dx = -1; dx <= 1; ++dx) {
                     for (int dy = -1; dy <= 1; ++dy) {
@@ -82,27 +86,54 @@ void DungeonGenerator::generateWalls() {
                         int nj = j + dy;
 
                         if (ni >= 0 && ni < config->mapHeight && nj >= 0 && nj < config->mapWidth) {
+                            if (dx == 0 && dy == 0)
+                                continue;  // Пропускаем текущую ячейку
+
                             if (dungeonMap[ni][nj] == 1) {
-                                dungeonMap[i][j] = 2;  // Меняем решетку на стенку (например 2, нужно будет подумать стоит ли менять магические числа)
-                                break;  // Прекращаем проверку при первом обнаружении соседней тайловой клетки
+                                if (dx == 0 || dy == 0) {
+                                    // Горизонтальный или вертикальный сосед
+                                    if (dx != 0) {
+                                        hasHorizontalNeighbor = true;
+                                    }
+                                    else {
+                                        hasVerticalNeighbor = true;
+                                    }
+                                }
+                                else {
+                                    // Диагональный сосед
+                                    hasDiagonalNeighbor = true;
+                                }
                             }
                         }
                     }
-                    if (dungeonMap[i][j] == 2) {
-                        break;  // Прекращаем проверку, если уже заменили решетку на стенку
-                    }
+                }
+
+                // Определяем тип стены и устанавливаем соответствующее значение в карту
+                if (hasHorizontalNeighbor && hasVerticalNeighbor) {
+                    dungeonMap[i][j] = 10;  // Угловая стена
+                }
+                else if (hasHorizontalNeighbor && !hasVerticalNeighbor) {
+                    dungeonMap[i][j] = 11;  // Горизонтальная стена
+                }
+                else if (!hasHorizontalNeighbor && hasVerticalNeighbor) {
+                    dungeonMap[i][j] = 12;  // Вертикальная стена
+                }
+                else if (hasDiagonalNeighbor) {
+                    dungeonMap[i][j] = 10;  // Угловая стена
                 }
             }
         }
     }
 }
 
+
+
 void DungeonGenerator::generateDoors(int doorChanceThreshold) {
     for (int i = 1; i < config->mapHeight - 1; ++i) {
         for (int j = 1; j < config->mapWidth - 1; ++j) {
             if (dungeonMap[i][j] == 1) {  // Проверяем, если текущая ячейка представляет собой тайл
-                bool hasVerticalWall = (dungeonMap[i - 1][j] == 2 && dungeonMap[i + 1][j] == 2);
-                bool hasHorizontalWall = (dungeonMap[i][j - 1] == 2 && dungeonMap[i][j + 1] == 2);
+                bool hasVerticalWall = (dungeonMap[i - 1][j] == 10 && dungeonMap[i + 1][j] == 10);
+                bool hasHorizontalWall = (dungeonMap[i][j - 1] == 10 && dungeonMap[i][j + 1] == 10);
                 int tileCount = 0;
 
                 // Подсчет окружающих тайлов в каждом направлении
@@ -126,14 +157,23 @@ void DungeonGenerator::generateDoors(int doorChanceThreshold) {
                 }
 
                 // Проверяем условия для генерации двери
-                if ((hasVerticalWall && !hasHorizontalWall && (upTileCount > 0 || downTileCount > 0)) ||
-                    (hasHorizontalWall && !hasVerticalWall && (leftTileCount > 0 || rightTileCount > 0))) {
+                if ((hasVerticalWall && !hasHorizontalWall && (upTileCount > 0 || downTileCount > 0)) ) {
                     if (tileCount > 3) {
                         int randomChance = std::rand() % 100; // бросаем кубики на создание двери
                         if (randomChance < doorChanceThreshold) {
-                            dungeonMap[i][j] = 3;  // Меняем тайл на дверь (например, 3, нужно будет подумать стоит ли менять магические числа)
+                            dungeonMap[i][j] = 3;  // Меняем тайл на дверь горизонтальная
                         }
                         
+                    }
+                }
+
+                if (hasHorizontalWall && !hasVerticalWall && (leftTileCount > 0 || rightTileCount > 0)) {
+                    if (tileCount > 3) {
+                        int randomChance = std::rand() % 100; // бросаем кубики на создание двери
+                        if (randomChance < doorChanceThreshold) {
+                            dungeonMap[i][j] = 4;  // Меняем тайл на дверь вертикальная
+                        }
+
                     }
                 }
             }

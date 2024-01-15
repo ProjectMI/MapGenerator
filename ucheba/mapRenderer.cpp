@@ -14,7 +14,7 @@
         case 3:
             return 'H';  // Дверь
         case 4:
-            return '#'; // Лава
+            return 'H'; // Дверь
         case 5:
             return 'V'; // Облако дыма
         case 6:
@@ -23,7 +23,16 @@
             return 'A'; // Пепел и каменные осколки
         case 8:
             return 'F'; // Огонь 
+
+        case 10:
+            return 'I'; // угловой 
+        case 11:
+            return 'I'; // горизонтальный
+        case 12:
+            return 'I'; // вертикальный 
         }
+
+
     }
 
     void MapRenderer::renderCell(int cellValue) {
@@ -42,9 +51,26 @@
             colorCode = "\033[38;5;34m";
             break;
         case 3:
-            // Дверь (красный)
+            // Дверь 
             colorCode = "\033[38;5;196m";
             break;
+        case 4:
+            // Дверь
+            colorCode = "\033[38;5;200m";
+            break;
+        case 10:
+            // Стена
+            colorCode = "\033[38;5;110m";
+            break;
+        case 11:
+            // Стена
+            colorCode = "\033[38;5;120m";
+            break;
+        case 12:
+            // Стена
+            colorCode = "\033[38;5;130m";
+            break;
+
         default:
             // Стандартный цвет
             colorCode = "\033[0m";

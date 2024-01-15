@@ -8,5 +8,6 @@ int main() {
     generator.generate();
     generator.printMap();
     EnvironmentGenerator EnvironmentGenerator(&generator, config); //сюда явно передаем объект генератора, без не получим карту генерации
+
     return 0;
 }
