@@ -9,6 +9,8 @@ public:
     EnvironmentGenerator(DungeonGenerator* dungeonGenerator, DungeonConfig* config);
     void generate();
     void printDungeonMap(const std::vector<std::vector<int>>& environmentMap);
+    void fillTorchesAndIvys();
+    void generateTorchesAndIvys(int i, int j, int generateChanceTheshold);
 
 
 private:

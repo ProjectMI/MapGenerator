@@ -12,14 +12,8 @@ EnvironmentGenerator::EnvironmentGenerator(DungeonGenerator* dungeonGenerator, D
 
 
 void EnvironmentGenerator::generate() {
-    for (int i = 1; i < config->mapHeight - 1; ++i) {
-        for (int j = 1; j < config->mapWidth - 1; ++j) {
-            if (dungeonMap[i][j] == 1) { // если встречаем тайл (1), то ставим предмет
-                int item = 1 + rand() % 9;
-                environmentMap[i][j] = item;
-            }
-        }
-    }
+    fillTorchesAndIvys();
+
     for (int i = 0; i < config->mapHeight; ++i) {
         for (int j = 0; j < config->mapWidth; ++j) {
             int cellValue = environmentMap[i][j];
@@ -41,3 +35,81 @@ void EnvironmentGenerator::printDungeonMap(const std::vector<std::vector<int>>& 
         std::cout << std::endl;
     }
 }
+
+void EnvironmentGenerator::fillTorchesAndIvys() {
+    for (int i = 0; i < config->mapHeight; ++i) {
+        for (int j = 0; j < config->mapWidth; ++j) {
+
+            if (dungeonMap[i][j] == 11) {               // горизонтальная стена вверх
+                generateTorchesAndIvys(i, j, 30);
+            }
+
+            if (dungeonMap[i][j] == 12) {               // горизонтальная стена вниз
+                generateTorchesAndIvys(i, j, 30);
+            }
+
+            if (dungeonMap[i][j] == 13) {               // вертикальная стена вверх
+                generateTorchesAndIvys(i, j, 30);
+            }
+
+            if (dungeonMap[i][j] == 14) {               // вертикальная стена вниз
+                generateTorchesAndIvys(i, j, 30);
+            }
+        }
+    }
+}
+
+void EnvironmentGenerator::generateTorchesAndIvys(int i, int j, int generateChanceTheshold) {
+    int randomForSpawn = std::rand() % 100; // бросаем кубики на создание факела в абсолютных величинах
+    int randomForTorches = std::rand() % 100;
+    int torchSpawnTreshold = 15;
+    if (randomForSpawn < generateChanceTheshold) {
+        
+        if (randomForTorches < torchSpawnTreshold) {
+            environmentMap[i][j] = 1; // только факел
+        }
+        else {
+            int randomForIvysAndTorches = std::rand() % 100;
+            int onlyIvysSpawnTreshold = 85;
+
+            if (randomForIvysAndTorches < onlyIvysSpawnTreshold) {
+                int chanceForProps = std::rand() % 2;
+                switch (chanceForProps) {
+                    case 0: {
+                        environmentMap[i][j] = 5; // только лианы
+                        break;
+                    }
+                    case 1: {
+                        environmentMap[i][j] = 6; // 2 лианы
+                        break;
+                    }
+                    case 2: {
+                        environmentMap[i][j] = 7; // 3 лианы
+                        break;
+                    }
+                }
+            }
+            else {
+                int chanceForProps = std::rand() % 2;
+                switch (chanceForProps) {
+                    case 0: {
+                        environmentMap[i][j] = 2; // факел + лианы
+                        break;
+                    }
+                    case 1: {
+                        environmentMap[i][j] = 3; // факел + 2 лианы
+                        break;
+                    }
+                    case 2: {
+                        environmentMap[i][j] = 4; // факел + 3 лианы
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+

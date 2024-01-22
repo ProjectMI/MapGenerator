@@ -24,7 +24,7 @@ public:
     void generateCorridor(const Corridor& corridor);
     void connectRooms();
     void generatePath(int startX, int startY, int endX, int endY);
-    void setPregenRoom(const pregenRoom& pregen, int roomCount);
+    void setPregenRoom(const pregenRoom& pregen, int roomCount, int extendNumber);
     void pregenRooms();
     const std::vector<std::vector<int>>& getDungeonMap() const;
 

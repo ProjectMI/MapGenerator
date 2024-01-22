@@ -23,12 +23,15 @@
             return 'A'; // Пепел и каменные осколки
         case 8:
             return 'F'; // Огонь 
-
         case 10:
             return 'I'; // угловой 
         case 11:
             return 'I'; // горизонтальный
         case 12:
+            return 'I'; // вертикальный 
+        case 13:
+            return 'I'; // вертикальный 
+        case 14:
             return 'I'; // вертикальный 
         }
 
@@ -67,6 +70,14 @@
             colorCode = "\033[38;5;120m";
             break;
         case 12:
+            // Стена
+            colorCode = "\033[38;5;120m";
+            break;
+        case 13:
+            // Стена
+            colorCode = "\033[38;5;130m";
+            break;
+        case 14:
             // Стена
             colorCode = "\033[38;5;130m";
             break;
