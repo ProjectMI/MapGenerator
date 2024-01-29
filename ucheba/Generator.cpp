@@ -7,6 +7,7 @@
 #include "mapRenderer.h"
 #include "pregenRoom.h"
 #include "dungeonConfig.h"
+#include "firstEnum.h"
 
 DungeonGenerator::DungeonGenerator(DungeonConfig* config)   :
     config(config), pregen(pregen)
@@ -20,9 +21,9 @@ void DungeonGenerator::generate() {
     generateRooms();
     generateCorridors();
     connectRooms();
-    pregenRooms();
     replaceDotsWithHashes();
     generateWalls();
+    pregenRooms();
     generateDoors(45);
     
 }
@@ -30,7 +31,7 @@ void DungeonGenerator::generate() {
 //Сюда спихиваем все комнаты которые хотим загенерить
 void DungeonGenerator::pregenRooms() {
     setPregenRoom(pregen.room1(), 3, 0);
-    setPregenRoom(pregen.room2(), 3, 6);
+    setPregenRoom(pregen.room2(), 10, 1);
 }
 
 void DungeonGenerator::printMap() {
@@ -51,21 +52,21 @@ void DungeonGenerator::printMap() {
 void DungeonGenerator::replaceDotsWithHashes() {
     // Перебираем верхнюю и нижнюю границы карты
     for (int i = 0; i < config->mapWidth; ++i) {
-        if (dungeonMap[0][i] == 1) {
-            dungeonMap[0][i] = 0;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+        if (dungeonMap[0][i] == to(TileSymbols::Tile)) {
+            dungeonMap[0][i] = to(TileSymbols::Void);  
         }
-        if (dungeonMap[config->mapHeight - 1][i] == 1) {
-            dungeonMap[config->mapHeight - 1][i] = 0;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+        if (dungeonMap[config->mapHeight - 1][i] == to(TileSymbols::Tile)) {
+            dungeonMap[config->mapHeight - 1][i] = to(TileSymbols::Void); 
         }
     }
 
     // Перебираем левую и правую границы карты
     for (int i = 0; i < config->mapHeight; ++i) {
-        if (dungeonMap[i][0] == 1) {
-            dungeonMap[i][0] = 0;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+        if (dungeonMap[i][0] == to(TileSymbols::Tile)) {
+            dungeonMap[i][0] = to(TileSymbols::Void);  
         }
-        if (dungeonMap[i][config->mapWidth - 1] == 1) {
-            dungeonMap[i][config->mapWidth - 1] = 0;  // Заменяем точку на другое значение (например, 0), представляющее стенку
+        if (dungeonMap[i][config->mapWidth - 1] == to(TileSymbols::Tile)) {
+            dungeonMap[i][config->mapWidth - 1] = to(TileSymbols::Void);  
         }
     }
 }
@@ -73,7 +74,7 @@ void DungeonGenerator::replaceDotsWithHashes() {
 void DungeonGenerator::generateWalls() {
     for (int i = 0; i < config->mapHeight; ++i) {
         for (int j = 0; j < config->mapWidth; ++j) {
-            if (dungeonMap[i][j] == 0) {  // Проверяем, если текущая ячейка представляет собой решетку
+            if (dungeonMap[i][j] == to(TileSymbols::Void)) {  // Проверяем, если текущая ячейка представляет собой решетку
                 bool hasHorizontalNeighbor = false;
                 bool hasVerticalNeighbor = false;
                 bool hasDiagonalNeighbor = false;  // Добавляем проверку на диагонального соседа
@@ -89,7 +90,7 @@ void DungeonGenerator::generateWalls() {
                             if (dx == 0 && dy == 0)
                                 continue;  // Пропускаем текущую ячейку
 
-                            if (dungeonMap[ni][nj] == 1) {
+                            if (dungeonMap[ni][nj] == to(TileSymbols::Tile)) {
                                 if (dx == 0 || dy == 0) {
                                     // Горизонтальный или вертикальный сосед
                                     if (dx != 0) {
@@ -115,44 +116,44 @@ void DungeonGenerator::generateWalls() {
                 bool left = false;
 
                 // Проверка клетки сверху
-                if (i > 0 && dungeonMap[i - 1][j] == 1) {
+                if (i > 0 && dungeonMap[i - 1][j] == to(TileSymbols::Tile)) {
                     top = true;
                 }
 
                 // Проверка клетки справа
-                if (j < config->mapWidth - 1 && dungeonMap[i][j + 1] == 1) {
+                if (j < config->mapWidth - 1 && dungeonMap[i][j + 1] == to(TileSymbols::Tile)) {
                     right = true;
                 }
 
                 // Проверка клетки снизу
-                if (i < config->mapHeight - 1 && dungeonMap[i + 1][j] == 1) {
+                if (i < config->mapHeight - 1 && dungeonMap[i + 1][j] == to(TileSymbols::Tile)) {
                     bot = true;
                 }
 
                 // Проверка клетки слева
-                if (j > 0 && dungeonMap[i][j - 1] == 1) {
+                if (j > 0 && dungeonMap[i][j - 1] == to(TileSymbols::Tile)) {
                     left = true;
                 }
 
                 // Определяем тип стены и устанавливаем соответствующее значение в карту
                 if (hasHorizontalNeighbor && !hasVerticalNeighbor) {
                     if (top) {
-                        dungeonMap[i][j] = 11;  // Горизонтальная стена верхняя
+                        dungeonMap[i][j] = to(TileSymbols::HorizontWallUp);
                     }
                     else if (bot) {
-                        dungeonMap[i][j] = 12;  // Горизонтальная стена нижняя
+                        dungeonMap[i][j] = to(TileSymbols::HorizontWallDown);
                     }
                 }
                 else if (!hasHorizontalNeighbor && hasVerticalNeighbor) {
                     if (right) {
-                        dungeonMap[i][j] = 13;  // Вертикальная стена правая
+                        dungeonMap[i][j] = to(TileSymbols::VertWallRight); 
                     }
                     else if (left) {
-                        dungeonMap[i][j] = 14;  // Вертикальная стена левая
+                        dungeonMap[i][j] = to(TileSymbols::VertWallLeft);  
                     }
                 }
                 else if ((hasHorizontalNeighbor && hasVerticalNeighbor) || hasDiagonalNeighbor) {
-                    dungeonMap[i][j] = 10;  // Угловая стена
+                    dungeonMap[i][j] = to(TileSymbols::AngleWall);  
                 }
             }
         }
@@ -164,9 +165,9 @@ void DungeonGenerator::generateWalls() {
 void DungeonGenerator::generateDoors(int doorChanceThreshold) {
     for (int i = 1; i < config->mapHeight - 1; ++i) {
         for (int j = 1; j < config->mapWidth - 1; ++j) {
-            if (dungeonMap[i][j] == 1) {  // Проверяем, если текущая ячейка представляет собой тайл
-                bool hasVerticalWall = (dungeonMap[i - 1][j] == 10 && dungeonMap[i + 1][j] == 10);
-                bool hasHorizontalWall = (dungeonMap[i][j - 1] == 10 && dungeonMap[i][j + 1] == 10);
+            if (dungeonMap[i][j] == to(TileSymbols::Tile)) {  
+                bool hasVerticalWall = (dungeonMap[i - 1][j] == to(TileSymbols::AngleWall) && dungeonMap[i + 1][j] == to(TileSymbols::AngleWall));
+                bool hasHorizontalWall = (dungeonMap[i][j - 1] == to(TileSymbols::AngleWall) && dungeonMap[i][j + 1] == to(TileSymbols::AngleWall));
                 int tileCount = 0;
 
                 // Подсчет окружающих тайлов в каждом направлении
@@ -174,7 +175,7 @@ void DungeonGenerator::generateDoors(int doorChanceThreshold) {
                 for (int dx = -1; dx <= 1; ++dx) {
                     for (int dy = -1; dy <= 1; ++dy) {
                         if (dx != 0 || dy != 0) {  // Исключаем текущую ячейку
-                            if (dungeonMap[i + dx][j + dy] == 1) {
+                            if (dungeonMap[i + dx][j + dy] == to(TileSymbols::Tile)) {
                                 tileCount++;
                                 // Подсчет тайлов в каждом направлении
                                 if (dx == -1) leftTileCount++;
@@ -192,9 +193,9 @@ void DungeonGenerator::generateDoors(int doorChanceThreshold) {
                 // Проверяем условия для генерации двери
                 if ((hasVerticalWall && !hasHorizontalWall && (upTileCount > 0 || downTileCount > 0))) {
                     if (tileCount > 3) {
-                        int randomChance = std::rand() % 100; // бросаем кубики на создание двери
+                        int randomChance = std::rand() % 100; 
                         if (randomChance < doorChanceThreshold) {
-                            dungeonMap[i][j] = 3;  // Меняем тайл на дверь горизонтальная
+                            dungeonMap[i][j] = to(TileSymbols::HorizontDoor);  
                         }
 
                     }
@@ -202,9 +203,9 @@ void DungeonGenerator::generateDoors(int doorChanceThreshold) {
 
                 if (hasHorizontalWall && !hasVerticalWall && (leftTileCount > 0 || rightTileCount > 0)) {
                     if (tileCount > 3) {
-                        int randomChance = std::rand() % 100; // бросаем кубики на создание двери
+                        int randomChance = std::rand() % 100; 
                         if (randomChance < doorChanceThreshold) {
-                            dungeonMap[i][j] = 4;  // Меняем тайл на дверь вертикальная
+                            dungeonMap[i][j] = to(TileSymbols::VertDoor); 
                         }
 
                     }
@@ -239,11 +240,11 @@ void DungeonGenerator::generateRooms() {
     }
 }
 
-
+// заливаем пространство тайлами
 void DungeonGenerator::fillTiles(const Room& room) {
     for (int i = room.y; i < room.y + room.height; ++i) {
         for (int j = room.x; j < room.x + room.width; ++j) {
-            dungeonMap[i][j] = 1; // заливаем пространство тайлами
+            dungeonMap[i][j] = to(TileSymbols::Tile); 
         }
     }
 }
@@ -285,7 +286,7 @@ void DungeonGenerator::generateCorridor(const Corridor& corridor) {
 
     for (int i = 0; i < corridor.length; ++i) {
         if (x >= 0 && x < config->mapWidth && y >= 0 && y < config->mapHeight) {
-            dungeonMap[y][x] = 1;
+            dungeonMap[y][x] = to(TileSymbols::Tile);
         }
 
         switch (corridor.direction) {
@@ -331,7 +332,7 @@ void DungeonGenerator::generatePath(int startX, int startY, int endX, int endY) 
         }
 
         if (currentX >= 0 && currentX < config->mapWidth && currentY >= 0 && currentY < config->mapHeight) {
-            dungeonMap[currentY][currentX] = 1;
+            dungeonMap[currentY][currentX] = to(TileSymbols::Tile);
         }
     }
 
@@ -344,7 +345,7 @@ void DungeonGenerator::generatePath(int startX, int startY, int endX, int endY) 
         }
 
         if (currentX >= 0 && currentX < config->mapWidth && currentY >= 0 && currentY < config->mapHeight) {
-            dungeonMap[currentY][currentX] = 1;
+            dungeonMap[currentY][currentX] = to(TileSymbols::Tile);
         }
     }
 }
@@ -411,7 +412,7 @@ void DungeonGenerator::setPregenRoom(const pregenRoom& pregen, int roomCount, in
             for (int y = 0; y < roomHeight; ++y) {
                 for (int x = 0; x < roomWidth; ++x) {
                     if (startX == 0 || startY == 0 || startX == config->mapWidth ||
-                        startY == config->mapHeight || dungeonMap[startY + y][startX + x] != 1) {
+                        startY == config->mapHeight || dungeonMap[startY + y][startX + x] != to(TileSymbols::Tile)) {
                         canPlaceRoom = false;
                         break;
                     }
@@ -448,7 +449,7 @@ void DungeonGenerator::setPregenRoom(const pregenRoom& pregen, int roomCount, in
 
                     for (int x = extendStartX + canPlaceX; x < extendStartX + roomWidth + 1; ++x) {
                         for (int y = extendStartY + canPlaceY; y < extendStartY + roomHeight + 1; ++y) {
-                            if (dungeonMap[y][x] != 1) {
+                            if (dungeonMap[y - 1][x - 1] != to(TileSymbols::Tile)) {
                                 canPlaceExtendedRoom = false;
                                 break;
                             }

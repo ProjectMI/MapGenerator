@@ -33,7 +33,10 @@
             return 'I'; // вертикальный 
         case 14:
             return 'I'; // вертикальный 
+        case 15:
+            return 'Y';
         }
+
 
 
     }
@@ -81,7 +84,10 @@
             // Стена
             colorCode = "\033[38;5;130m";
             break;
-
+        case 15:
+            // грибы
+            colorCode = "\033[38;5;12m";
+            break;
         default:
             // Стандартный цвет
             colorCode = "\033[0m";

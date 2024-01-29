@@ -23,7 +23,7 @@ pregenRoom pregenRoom::room1() {
 
 pregenRoom pregenRoom::room2() {
     return pregenRoom({
-        {2, 2, 2},
-        {2, 2, 1},
+        {15, 15, 15},
+        {15, 15, 1},
         });
 }

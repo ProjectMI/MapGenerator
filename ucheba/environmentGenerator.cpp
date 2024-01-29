@@ -41,19 +41,19 @@ void EnvironmentGenerator::fillTorchesAndIvys() {
         for (int j = 0; j < config->mapWidth; ++j) {
 
             if (dungeonMap[i][j] == 11) {               // горизонтальная стена вверх
-                generateTorchesAndIvys(i, j, 30);
+                generateTorchesAndIvys(i, j, 100);
             }
 
             if (dungeonMap[i][j] == 12) {               // горизонтальная стена вниз
-                generateTorchesAndIvys(i, j, 30);
+                generateTorchesAndIvys(i, j, 100);
             }
 
             if (dungeonMap[i][j] == 13) {               // вертикальная стена вверх
-                generateTorchesAndIvys(i, j, 30);
+                generateTorchesAndIvys(i, j, 100);
             }
 
             if (dungeonMap[i][j] == 14) {               // вертикальная стена вниз
-                generateTorchesAndIvys(i, j, 30);
+                generateTorchesAndIvys(i, j, 100);
             }
         }
     }
